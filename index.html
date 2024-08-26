@@ -31,7 +31,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 300px;
+            width: 400px; /* Increased width for more space */
             padding: 20px;
             background-color: #c0c0c0;
             border: 2px solid #000;
@@ -63,6 +63,13 @@
         }
 
         .popup-content {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .popup-content img {
+            max-width: 100%; /* Make sure the image fits within the popup */
+            height: auto;
             margin-bottom: 20px;
         }
 
@@ -87,7 +94,9 @@
             Peter Alert
             <span class="popup-close" onclick="closePopup()">×</span>
         </div>
-        <div class="popup-content">This is a Windows-style popup!</div>
+        <div class="popup-content">
+            <img src="Images/small-picture.jpg" alt="Popup Picture">
+        </div>
         <div class="popup-button" onclick="closePopup()">OK</div>
     </div>
 
