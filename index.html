@@ -48,7 +48,6 @@
             color: white;
             padding: 5px;
             text-align: center;
-            cursor: move; /* Change cursor to indicate draggable area */
         }
 
         .popup-content {
@@ -80,8 +79,9 @@
     <script>
         // Show the popup after 5 seconds
         setTimeout(function() {
-            document.getElementById('popup').style.display = 'block';
-            makeDraggable(document.getElementById('popup'));
+            const popup = document.getElementById('popup');
+            popup.style.display = 'block';
+            makeDraggable(popup);
         }, 5000); // 5000 milliseconds = 5 seconds
 
         // Function to close the popup
@@ -94,11 +94,11 @@
             let isDragging = false;
             let offsetX = 0;
             let offsetY = 0;
-            
-            const header = element.querySelector('.popup-header');
-            
-            header.addEventListener('mousedown', (event) => {
+
+            // Add event listeners to the entire popup, not just the header
+            element.addEventListener('mousedown', (event) => {
                 isDragging = true;
+                // Calculate the offsets relative to the mouse position
                 offsetX = event.clientX - element.getBoundingClientRect().left;
                 offsetY = event.clientY - element.getBoundingClientRect().top;
                 document.addEventListener('mousemove', onMouseMove);
@@ -107,6 +107,7 @@
 
             function onMouseMove(event) {
                 if (isDragging) {
+                    // Update the position of the popup
                     element.style.left = `${event.clientX - offsetX}px`;
                     element.style.top = `${event.clientY - offsetY}px`;
                 }
