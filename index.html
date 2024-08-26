@@ -43,12 +43,23 @@
         }
 
         .popup-header {
+            position: relative; /* Position relative for the close button */
             font-weight: bold;
             margin-bottom: 10px;
             background-color: #000080;
             color: white;
             padding: 5px;
             text-align: center;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
         }
 
         .popup-content {
@@ -72,7 +83,10 @@
 
     <!-- Popup Window -->
     <div id="popup" class="popup">
-        <div class="popup-header">Peter Alert</div>
+        <div class="popup-header">
+            Peter Alert
+            <span class="popup-close" onclick="closePopup()">×</span>
+        </div>
         <div class="popup-content">This is a Windows-style popup!</div>
         <div class="popup-button" onclick="closePopup()">OK</div>
     </div>
