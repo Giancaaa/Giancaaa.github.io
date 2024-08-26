@@ -41,6 +41,9 @@
             font-family: 'Verdana', sans-serif;
             cursor: move; /* Change cursor to indicate draggable area */
             user-select: none; /* Prevent text selection */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .popup-header {
@@ -64,13 +67,15 @@
 
         .popup-content {
             text-align: center;
-            margin-bottom: 20px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .popup-content img {
             width: 128px; /* Fixed width of the image */
             height: 128px; /* Fixed height of the image */
-            margin: 0 auto;
         }
 
         .popup-button {
@@ -95,7 +100,7 @@
             <span class="popup-close" onclick="closePopup()">×</span>
         </div>
         <div class="popup-content">
-            <img src="Images/small-picture.jpg" alt="Popup Picture">
+            <img src="Images/peter-alert.png" alt="Peter Alert">
         </div>
         <div class="popup-button" onclick="closePopup()">OK</div>
     </div>
