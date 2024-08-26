@@ -110,16 +110,30 @@
     </div>
 
     <script>
-        // Show the popup after 5 seconds
+        // Show the popup after a random time between 5 and 20 seconds
         window.addEventListener('load', () => {
+            const randomTime = Math.floor(Math.random() * (20000 - 5000 + 1)) + 5000; // Random time between 5,000ms (5s) and 20,000ms (20s)
+
             setTimeout(function() {
                 const popup = document.getElementById('popup');
-                popup.classList.add('show'); // Show the popup with the 'show' class
-                popup.style.top = '50%'; // Center vertically
-                popup.style.left = '50%'; // Center horizontally
-                popup.style.transform = 'translate(-50%, -50%)'; // Center exactly
+                
+                // Calculate random position
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+                const popupWidth = popup.offsetWidth;
+                const popupHeight = popup.offsetHeight;
+
+                // Ensure the popup is fully within the viewport
+                const randomLeft = Math.random() * (screenWidth - popupWidth);
+                const randomTop = Math.random() * (screenHeight - popupHeight);
+
+                // Set random position
+                popup.style.left = `${randomLeft}px`;
+                popup.style.top = `${randomTop}px`;
+
+                popup.classList.add('show'); // Show the popup
                 makeDraggable(popup);
-            }, 5000); // 5000 milliseconds = 5 seconds
+            }, randomTime); // Random time for popup to appear
         });
 
         // Function to close the popup
