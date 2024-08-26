@@ -28,9 +28,6 @@
         .popup {
             display: none; /* Hidden by default */
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             width: 300px; /* Original width */
             height: 200px; /* Original height */
             padding: 20px;
@@ -44,6 +41,13 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            opacity: 0; /* Start invisible */
+            transition: opacity 0.5s ease; /* Smooth transition */
+        }
+
+        .popup.show {
+            display: flex; /* Show when the class 'show' is added */
+            opacity: 1; /* Fade in effect */
         }
 
         .popup-header {
@@ -110,14 +114,18 @@
         window.addEventListener('load', () => {
             setTimeout(function() {
                 const popup = document.getElementById('popup');
-                popup.style.display = 'block';
+                popup.classList.add('show'); // Show the popup with the 'show' class
+                popup.style.top = '50%'; // Center vertically
+                popup.style.left = '50%'; // Center horizontally
+                popup.style.transform = 'translate(-50%, -50%)'; // Center exactly
                 makeDraggable(popup);
             }, 5000); // 5000 milliseconds = 5 seconds
         });
 
         // Function to close the popup
         function closePopup() {
-            document.getElementById('popup').style.display = 'none';
+            const popup = document.getElementById('popup');
+            popup.classList.remove('show'); // Hide the popup
         }
 
         // Function to make the element draggable
