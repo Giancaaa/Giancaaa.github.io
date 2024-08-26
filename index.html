@@ -109,6 +109,10 @@
         <div class="popup-button" onclick="closePopup()">OK</div>
     </div>
 
+    <!-- Audio elements for sound effects -->
+    <audio id="appear-sound" src="SFX/peter-alert-appear.mp3"></audio>
+    <audio id="vanish-sound" src="SFX/peter-alert-vanish.mp3"></audio>
+
     <script>
         // Show the popup after a random time between 5 and 20 seconds
         window.addEventListener('load', () => {
@@ -116,7 +120,8 @@
 
             setTimeout(function() {
                 const popup = document.getElementById('popup');
-                
+                const appearSound = document.getElementById('appear-sound');
+
                 // Calculate random position
                 const screenWidth = window.innerWidth;
                 const screenHeight = window.innerHeight;
@@ -132,6 +137,7 @@
                 popup.style.top = `${randomTop}px`;
 
                 popup.classList.add('show'); // Show the popup
+                appearSound.play(); // Play appear sound
                 makeDraggable(popup);
             }, randomTime); // Random time for popup to appear
         });
@@ -139,6 +145,9 @@
         // Function to close the popup
         function closePopup() {
             const popup = document.getElementById('popup');
+            const vanishSound = document.getElementById('vanish-sound');
+
+            vanishSound.play(); // Play vanish sound
             popup.classList.remove('show'); // Hide the popup
         }
 
