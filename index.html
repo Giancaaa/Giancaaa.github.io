@@ -92,24 +92,26 @@
         // Function to make the element draggable
         function makeDraggable(element) {
             let isDragging = false;
-            let offsetX = 0;
-            let offsetY = 0;
+            let startX, startY, startLeft, startTop;
 
-            // Add event listeners to the entire popup, not just the header
             element.addEventListener('mousedown', (event) => {
                 isDragging = true;
-                // Calculate the offsets relative to the mouse position
-                offsetX = event.clientX - element.getBoundingClientRect().left;
-                offsetY = event.clientY - element.getBoundingClientRect().top;
+                startX = event.clientX;
+                startY = event.clientY;
+                startLeft = parseInt(window.getComputedStyle(element).left, 10) || 0;
+                startTop = parseInt(window.getComputedStyle(element).top, 10) || 0;
+
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
             });
 
             function onMouseMove(event) {
                 if (isDragging) {
-                    // Update the position of the popup
-                    element.style.left = `${event.clientX - offsetX}px`;
-                    element.style.top = `${event.clientY - offsetY}px`;
+                    const deltaX = event.clientX - startX;
+                    const deltaY = event.clientY - startY;
+
+                    element.style.left = `${startLeft + deltaX}px`;
+                    element.style.top = `${startTop + deltaY}px`;
                 }
             }
 
