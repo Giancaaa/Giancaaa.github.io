@@ -93,14 +93,26 @@
             cursor: pointer;
         }
 
-        /* Image drop styling */
-        #bart {
-            position: absolute;
-            display: none;
-            bottom: 0;
+        /* Bart animation */
+        @keyframes dropAnimation {
+            0% { top: -150px; opacity: 0; }
+            30% { opacity: 1; }
+            100% { top: 90vh; }
+        }
+
+        .bart-image {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
             width: 100px;
             height: 100px;
-            z-index: 999;
+            display: none;
+            z-index: 1001;
+        }
+
+        .bart-image.show {
+            display: block;
+            animation: dropAnimation 3s ease forwards;
         }
     </style>
 </head>
@@ -120,14 +132,16 @@
     </div>
 
     <!-- Bart Image -->
-    <img id="bart" src="Images/Bart.png" alt="Bart">
+    <img id="bart" src="Images/Bart.png" class="bart-image" alt="Bart Image">
 
     <!-- Audio elements for sound effects -->
     <audio id="appear-sound" src="SFX/peter-alert-appear.mp3"></audio>
     <audio id="vanish-sound" src="SFX/peter-alert-vanish.mp3"></audio>
 
     <script>
-        // Show the popup after a random time between 5 and 20 seconds
+        let shakeStartTime = null;
+        let isBartDropped = false;
+
         window.addEventListener('load', () => {
             const randomTime = Math.floor(Math.random() * (20000 - 5000 + 1)) + 5000; // Random time between 5,000ms (5s) and 20,000ms (20s)
 
@@ -168,9 +182,6 @@
         function makeDraggable(element) {
             let isDragging = false;
             let startX, startY, startLeft, startTop;
-            let shakeStartTime = null;
-            const shakeThreshold = 3000; // 3 seconds
-            const shakeDistance = 10; // Minimum distance to consider as a shake
 
             element.addEventListener('mousedown', (event) => {
                 isDragging = true;
@@ -179,11 +190,12 @@
                 startLeft = parseInt(window.getComputedStyle(element).left, 10) || 0;
                 startTop = parseInt(window.getComputedStyle(element).top, 10) || 0;
 
+                if (shakeStartTime === null) {
+                    shakeStartTime = Date.now();
+                }
+
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
-
-                // Initialize shake start time
-                shakeStartTime = null;
             });
 
             function onMouseMove(event) {
@@ -194,32 +206,26 @@
                     element.style.left = `${startLeft + deltaX}px`;
                     element.style.top = `${startTop + deltaY}px`;
 
-                    // Detect shake
-                    if (Math.abs(deltaX) > shakeDistance || Math.abs(deltaY) > shakeDistance) {
-                        if (!shakeStartTime) {
-                            shakeStartTime = Date.now();
-                        } else if (Date.now() - shakeStartTime >= shakeThreshold) {
-                            triggerBartDrop();
-                            shakeStartTime = null; // Reset shake timer after drop
-                        }
-                    } else {
-                        shakeStartTime = null; // Reset shake timer if movement stops
+                    // Check if the popup has been shaken for 3 seconds
+                    const shakeDuration = Date.now() - shakeStartTime;
+                    if (shakeDuration >= 3000 && !isBartDropped) {
+                        dropBartImage();
+                        isBartDropped = true;
                     }
                 }
             }
 
             function onMouseUp() {
                 isDragging = false;
+                shakeStartTime = null;
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
             }
+        }
 
-            function triggerBartDrop() {
-                const bartImage = document.getElementById('bart');
-                bartImage.style.display = 'block';
-                bartImage.style.left = `${element.offsetLeft + element.offsetWidth / 2 - bartImage.offsetWidth / 2}px`;
-                bartImage.style.top = `${element.offsetTop + element.offsetHeight}px`;
-            }
+        function dropBartImage() {
+            const bart = document.getElementById('bart');
+            bart.classList.add('show');
         }
     </script>
 </body>
