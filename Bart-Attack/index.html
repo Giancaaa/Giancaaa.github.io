@@ -14,12 +14,210 @@
     <div id="renderDiv"></div>
 
     <script>
-        // Your game code goes here
-        class Example extends Phaser.Scene {
-            // ... (paste your entire game code here)
+        class Example extends Phaser.Scene
+        {
+            constructor ()
+            {
+                super();
+                this.gnats = null;
+                this.score = 0;
+                this.scoreText = null;
+                this.music = null;
+                this.levelText = null;
+                this.maxGnats = 15;
+            }
+
+            preload ()
+            {
+                this.load.image('orchard', `https://play.rosebud.ai/assets/night_02.png?S9KX`);
+                this.load.image('apple', `https://play.rosebud.ai/assets/apple_without_Shadow.png?Dhji`);
+                this.load.image('red', `https://play.rosebud.ai/assets/red.png?fVC0`);
+                this.load.image('gnat', 'https://play.rosebud.ai/assets/Bart_Gnat.png?voJR');
+                this.load.audio('gnatAttackMusic', 'https://play.rosebud.ai/assets/Gnat Attack - Level 1.mp3?U4kz');
+                this.load.image('background', 'https://play.rosebud.ai/assets/gnatattack.png?s66r');
+            }
+
+            create ()
+            {
+                // Add the new background
+                const background = this.add.image(400, 300, 'background');
+                
+                // Scale the background to fit the game width while maintaining aspect ratio
+                const scaleX = 800 / background.width;
+                const scaleY = 600 / background.height;
+                const scale = Math.max(scaleX, scaleY);
+                
+                background.setScale(scale);
+
+                // Center the background
+                background.setPosition(400, 300);
+
+                // Create a group for gnats
+                this.gnats = this.physics.add.group();
+
+                // Spawn gnats
+                this.time.addEvent({
+                    delay: 1000,
+                    callback: this.spawnGnat,
+                    callbackScope: this,
+                    loop: true
+                });
+
+                // Create score text
+                this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#fff' });
+
+                // Enable cursor input
+                this.input.on('pointerdown', this.swatGnat, this);
+
+                // Add and play the music
+                this.music = this.sound.add('gnatAttackMusic', { loop: true });
+                this.music.play();
+
+                // Add "LEVEL 1" text
+                this.levelText = this.add.text(400, -50, 'LEVEL 1', {
+                    fontFamily: 'Papyrus, Fantasy',
+                    fontSize: '64px',
+                    fill: '#ffffff',
+                    stroke: '#000000',
+                    strokeThickness: 6
+                });
+                this.levelText.setOrigin(0.5);
+
+                // Animate the "LEVEL 1" text
+                this.tweens.add({
+                    targets: this.levelText,
+                    y: 300,
+                    ease: 'Bounce',
+                    duration: 1500,
+                    onComplete: () => {
+                        this.tweens.add({
+                            targets: this.levelText,
+                            y: -100,
+                            ease: 'Quart.easeIn',
+                            duration: 1000,
+                            delay: 1000
+                        });
+                    }
+                });
+
+                this.time.addEvent({
+                    delay: 3000,
+                    loop: false,
+                    callback: () => {
+                        // this.scene.start('new-scene');
+                        // this.switchScene();
+                    },
+                });
+            }
+
+            spawnGnat ()
+            {
+                if (this.gnats.getChildren().length >= this.maxGnats) {
+                    return;
+                }
+
+                let x, y, targetX, targetY;
+                const side = Phaser.Math.Between(0, 3);
+
+                switch (side) {
+                    case 0: // Top
+                        x = Phaser.Math.Between(0, 800);
+                        y = -100;
+                        targetX = x;
+                        targetY = Phaser.Math.Between(100, 500);
+                        break;
+                    case 1: // Right
+                        x = 900;
+                        y = Phaser.Math.Between(0, 600);
+                        targetX = Phaser.Math.Between(300, 700);
+                        targetY = y;
+                        break;
+                    case 2: // Bottom
+                        x = Phaser.Math.Between(0, 800);
+                        y = 700;
+                        targetX = x;
+                        targetY = Phaser.Math.Between(100, 500);
+                        break;
+                    case 3: // Left
+                        x = -100;
+                        y = Phaser.Math.Between(0, 600);
+                        targetX = Phaser.Math.Between(100, 500);
+                        targetY = y;
+                        break;
+                }
+
+                const gnat = this.gnats.create(x, y, 'gnat');
+                gnat.setScale(1.0);
+
+                // Set a hitbox that matches the gnat's dimensions
+                gnat.setSize(gnat.width * 0.8, gnat.height * 0.8);
+                gnat.setOffset(gnat.width * 0.1, gnat.height * 0.1);
+
+                this.tweens.add({
+                    targets: gnat,
+                    x: targetX,
+                    y: targetY,
+                    duration: 2000,
+                    ease: 'Sine.easeInOut',
+                    onComplete: () => {
+                        this.moveGnatSmoothly(gnat);
+                    }
+                });
+            }
+
+            moveGnatSmoothly(gnat) {
+                const targetX = Phaser.Math.Between(50, 750);
+                const targetY = Phaser.Math.Between(50, 550);
+                
+                this.tweens.add({
+                    targets: gnat,
+                    x: targetX,
+                    y: targetY,
+                    duration: 3000,
+                    ease: 'Sine.easeInOut',
+                    onComplete: () => {
+                        this.moveGnatSmoothly(gnat);
+                    }
+                });
+            }
+
+            swatGnat (pointer)
+            {
+                const swatRadius = 20; // Increased swat radius to match larger hitbox
+                let closestGnat = null;
+                let closestDistance = Infinity;
+
+                this.gnats.getChildren().forEach(gnat => {
+                    const distance = Phaser.Math.Distance.Between(gnat.x, gnat.y, pointer.x, pointer.y);
+                    if (distance < closestDistance && distance < swatRadius) {
+                        closestGnat = gnat;
+                        closestDistance = distance;
+                    }
+                });
+
+                if (closestGnat) {
+                    this.tweens.killTweensOf(closestGnat);
+                    this.tweens.add({
+                        targets: closestGnat,
+                        y: 700,
+                        rotation: 5,
+                        duration: 1000,
+                        ease: 'Quad.easeIn',
+                        onComplete: () => {
+                            closestGnat.destroy();
+                        }
+                    });
+                    this.score += 10;
+                    this.scoreText.setText('Score: ' + this.score);
+                }
+            }
+
+            update ()
+            {
+                // Update game logic here if needed
+            }
         }
 
-        const container = document.getElementById('renderDiv');
         const config = {
             type: Phaser.AUTO,
             parent: 'renderDiv',
@@ -33,13 +231,15 @@
             physics: {
                 default: 'arcade',
                 arcade: {
-                    gravity: { y: 0 }
+                    gravity: { y: 0 } // Remove gravity for flying gnats
                 }
             },
             scene: Example
         };
 
-        window.phaserGame = new Phaser.Game(config);
+        window.addEventListener('load', () => {
+            window.phaserGame = new Phaser.Game(config);
+        });
     </script>
 </body>
 </html>
