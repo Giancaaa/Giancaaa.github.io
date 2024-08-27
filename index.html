@@ -136,6 +136,8 @@
     <script>
         let shakeCount = 0;
         let shakeTimeout;
+        let isPopupFrozen = false;
+        let isBartReleased = false;
 
         window.addEventListener('load', () => {
             const randomTime = Math.floor(Math.random() * (20000 - 5000 + 1)) + 5000; // Random time between 5,000ms (5s) and 20,000ms (20s)
@@ -179,6 +181,8 @@
             let startX, startY, startLeft, startTop;
 
             element.addEventListener('mousedown', (event) => {
+                if (isPopupFrozen) return; // Stop dragging if popup is frozen
+
                 isDragging = true;
                 startX = event.clientX;
                 startY = event.clientY;
@@ -205,8 +209,8 @@
                     }
 
                     // Trigger Bart drop after 3 seconds of shaking
-                    if (shakeCount > 30) { // 30 shake movements ~ 3 seconds
-                        shakeCount = 0;
+                    if (shakeCount > 30 && !isPopupFrozen) { // 30 shake movements ~ 3 seconds
+                        isPopupFrozen = true;
                         freezePopupAndDropBart(element);
                     }
                 }
@@ -221,25 +225,30 @@
 
         function freezePopupAndDropBart(popup) {
             popup.style.pointerEvents = 'none'; // Disable further dragging
-            const bart = document.getElementById('bart');
-            bart.style.left = `${parseInt(popup.style.left) + popup.offsetWidth / 2 - 64}px`;
-            bart.style.top = `${parseInt(popup.style.top) - 128}px`;
-            bart.style.display = 'block';
 
-            // Animate Bart dropping down and bouncing
-            let bounceAnimation = bart.animate([
-                { top: `${parseInt(bart.style.top)}px` },
-                { top: `100%` }
-            ], {
-                duration: 2000,
-                easing: 'ease-in-out',
-                iterations: 1,
-            });
+            if (!isBartReleased) {
+                isBartReleased = true; // Ensure Bart only flies out once
 
-            bounceAnimation.onfinish = () => {
-                bart.style.top = 'calc(100% - 128px)';
-                bart.style.animation = 'bounce 1s infinite';
-            };
+                const bart = document.getElementById('bart');
+                bart.style.left = `${parseInt(popup.style.left) + popup.offsetWidth / 2 - 64}px`;
+                bart.style.top = `${parseInt(popup.style.top) - 128}px`;
+                bart.style.display = 'block';
+
+                // Animate Bart dropping down and bouncing
+                let bounceAnimation = bart.animate([
+                    { top: `${parseInt(bart.style.top)}px` },
+                    { top: `100%` }
+                ], {
+                    duration: 2000,
+                    easing: 'ease-in-out',
+                    iterations: 1,
+                });
+
+                bounceAnimation.onfinish = () => {
+                    bart.style.top = 'calc(100% - 128px)';
+                    bart.style.animation = 'bounce 1s infinite';
+                };
+            }
         }
     </script>
 </body>
