@@ -93,31 +93,21 @@
             cursor: pointer;
         }
 
-        /* Bart animation */
-        @keyframes flyOutAnimation {
-            0% { top: -150px; opacity: 0; }
-            30% { opacity: 1; }
-            100% { top: 90vh; left: 50%; transform: translateX(-50%); }
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-30px); }
-        }
-
-        .bart-image {
-            position: fixed;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 100px;
+        /* Bart image styling */
+        #bart {
             display: none;
+            position: fixed;
+            width: 128px;
+            height: 128px;
             z-index: 1001;
         }
 
-        .bart-image.show {
-            display: block;
-            animation: flyOutAnimation 1s ease forwards, bounce 1s infinite alternate;
+        @keyframes bounce {
+            0% { top: 100%; }
+            25% { top: 90%; }
+            50% { top: 100%; }
+            75% { top: 95%; }
+            100% { top: 100%; }
         }
     </style>
 </head>
@@ -136,16 +126,16 @@
         <div class="popup-button" onclick="closePopup()">OK</div>
     </div>
 
-    <!-- Bart Image -->
-    <img id="bart" src="Images/Bart.png" class="bart-image" alt="Bart Image">
+    <!-- Bart image -->
+    <img id="bart" src="Images/Bart.png" alt="Bart">
 
     <!-- Audio elements for sound effects -->
     <audio id="appear-sound" src="SFX/peter-alert-appear.mp3"></audio>
     <audio id="vanish-sound" src="SFX/peter-alert-vanish.mp3"></audio>
 
     <script>
-        let shakeStartTime = null;
-        let isBartDropped = false;
+        let shakeCount = 0;
+        let shakeTimeout;
 
         window.addEventListener('load', () => {
             const randomTime = Math.floor(Math.random() * (20000 - 5000 + 1)) + 5000; // Random time between 5,000ms (5s) and 20,000ms (20s)
@@ -183,7 +173,7 @@
             popup.classList.remove('show'); // Hide the popup
         }
 
-        // Function to make the element draggable
+        // Function to make the element draggable and track shaking
         function makeDraggable(element) {
             let isDragging = false;
             let startX, startY, startLeft, startTop;
@@ -194,10 +184,6 @@
                 startY = event.clientY;
                 startLeft = parseInt(window.getComputedStyle(element).left, 10) || 0;
                 startTop = parseInt(window.getComputedStyle(element).top, 10) || 0;
-
-                if (shakeStartTime === null) {
-                    shakeStartTime = Date.now();
-                }
 
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
@@ -211,37 +197,49 @@
                     element.style.left = `${startLeft + deltaX}px`;
                     element.style.top = `${startTop + deltaY}px`;
 
-                    // Check if the popup has been shaken for 3 seconds
-                    const shakeDuration = Date.now() - shakeStartTime;
-                    if (shakeDuration >= 3000 && !isBartDropped) {
-                        freezePopup();
-                        dropBartImage();
-                        isBartDropped = true;
+                    // Track shaking
+                    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                        shakeCount++;
+                        clearTimeout(shakeTimeout);
+                        shakeTimeout = setTimeout(() => shakeCount = 0, 500); // Reset shake count after 500ms of no shaking
+                    }
+
+                    // Trigger Bart drop after 3 seconds of shaking
+                    if (shakeCount > 30) { // 30 shake movements ~ 3 seconds
+                        shakeCount = 0;
+                        freezePopupAndDropBart(element);
                     }
                 }
             }
 
             function onMouseUp() {
                 isDragging = false;
-                shakeStartTime = null;
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
             }
         }
 
-        // Function to freeze the popup in place
-        function freezePopup() {
-            const popup = document.getElementById('popup');
+        function freezePopupAndDropBart(popup) {
             popup.style.pointerEvents = 'none'; // Disable further dragging
-            popup.style.cursor = 'default';
-        }
-
-        // Function to animate the Bart image
-        function dropBartImage() {
             const bart = document.getElementById('bart');
-            bart.style.top = '-150px'; // Start position above the popup
-            bart.style.left = `calc(${parseInt(popup.style.left, 10) + popup.offsetWidth / 2}px)`;
-            bart.classList.add('show');
+            bart.style.left = `${parseInt(popup.style.left) + popup.offsetWidth / 2 - 64}px`;
+            bart.style.top = `${parseInt(popup.style.top) - 128}px`;
+            bart.style.display = 'block';
+
+            // Animate Bart dropping down and bouncing
+            let bounceAnimation = bart.animate([
+                { top: `${parseInt(bart.style.top)}px` },
+                { top: `100%` }
+            ], {
+                duration: 2000,
+                easing: 'ease-in-out',
+                iterations: 1,
+            });
+
+            bounceAnimation.onfinish = () => {
+                bart.style.top = 'calc(100% - 128px)';
+                bart.style.animation = 'bounce 1s infinite';
+            };
         }
     </script>
 </body>
