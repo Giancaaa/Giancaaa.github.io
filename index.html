@@ -92,6 +92,16 @@
             text-align: center;
             cursor: pointer;
         }
+
+        /* Image drop styling */
+        #bart {
+            position: absolute;
+            display: none;
+            bottom: 0;
+            width: 100px;
+            height: 100px;
+            z-index: 999;
+        }
     </style>
 </head>
 <body>
@@ -108,6 +118,9 @@
         </div>
         <div class="popup-button" onclick="closePopup()">OK</div>
     </div>
+
+    <!-- Bart Image -->
+    <img id="bart" src="Images/Bart.png" alt="Bart">
 
     <!-- Audio elements for sound effects -->
     <audio id="appear-sound" src="SFX/peter-alert-appear.mp3"></audio>
@@ -155,6 +168,9 @@
         function makeDraggable(element) {
             let isDragging = false;
             let startX, startY, startLeft, startTop;
+            let shakeStartTime = null;
+            const shakeThreshold = 3000; // 3 seconds
+            const shakeDistance = 10; // Minimum distance to consider as a shake
 
             element.addEventListener('mousedown', (event) => {
                 isDragging = true;
@@ -165,6 +181,9 @@
 
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
+
+                // Initialize shake start time
+                shakeStartTime = null;
             });
 
             function onMouseMove(event) {
@@ -174,6 +193,18 @@
 
                     element.style.left = `${startLeft + deltaX}px`;
                     element.style.top = `${startTop + deltaY}px`;
+
+                    // Detect shake
+                    if (Math.abs(deltaX) > shakeDistance || Math.abs(deltaY) > shakeDistance) {
+                        if (!shakeStartTime) {
+                            shakeStartTime = Date.now();
+                        } else if (Date.now() - shakeStartTime >= shakeThreshold) {
+                            triggerBartDrop();
+                            shakeStartTime = null; // Reset shake timer after drop
+                        }
+                    } else {
+                        shakeStartTime = null; // Reset shake timer if movement stops
+                    }
                 }
             }
 
@@ -181,6 +212,13 @@
                 isDragging = false;
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
+            }
+
+            function triggerBartDrop() {
+                const bartImage = document.getElementById('bart');
+                bartImage.style.display = 'block';
+                bartImage.style.left = `${element.offsetLeft + element.offsetWidth / 2 - bartImage.offsetWidth / 2}px`;
+                bartImage.style.top = `${element.offsetTop + element.offsetHeight}px`;
             }
         }
     </script>
