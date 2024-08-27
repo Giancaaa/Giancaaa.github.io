@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gnat Attack Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #000; }
+        #renderDiv { width: 800px; height: 600px; }
+    </style>
+</head>
+<body>
+    <div id="renderDiv"></div>
+
+    <script>
+        // Your game code goes here
+        class Example extends Phaser.Scene {
+            // ... (paste your entire game code here)
+        }
+
+        const container = document.getElementById('renderDiv');
+        const config = {
+            type: Phaser.AUTO,
+            parent: 'renderDiv',
+            pixelArt: true,
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+            },
+            width: 800,
+            height: 600,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 }
+                }
+            },
+            scene: Example
+        };
+
+        window.phaserGame = new Phaser.Game(config);
+    </script>
+</body>
+</html>
