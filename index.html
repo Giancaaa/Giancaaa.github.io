@@ -26,32 +26,31 @@
 
         /* Popup styling */
         .popup {
-            display: none; /* Hidden by default */
+            display: none;
             position: fixed;
-            width: 300px; /* Original width */
-            height: 200px; /* Original height */
+            width: 300px;
+            height: 200px;
             padding: 20px;
             background-color: #c0c0c0;
             border: 2px solid #000;
             box-shadow: 10px 10px 5px #888888;
             z-index: 1000;
             font-family: 'Verdana', sans-serif;
-            cursor: move; /* Change cursor to indicate draggable area */
-            user-select: none; /* Prevent text selection */
+            cursor: move;
+            user-select: none;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            opacity: 0; /* Start invisible */
-            transition: opacity 0.5s ease; /* Smooth transition */
+            transition: opacity 0.5s ease;
         }
 
         .popup.show {
-            display: flex; /* Show when the class 'show' is added */
-            opacity: 1; /* Fade in effect */
+            display: flex;
+            opacity: 1;
         }
 
         .popup-header {
-            position: relative; /* Position relative for the close button */
+            position: relative;
             font-weight: bold;
             background-color: #000080;
             color: white;
@@ -78,8 +77,8 @@
         }
 
         .popup-content img {
-            width: 100px; /* Smaller width */
-            height: 100px; /* Smaller height */
+            width: 100px;
+            height: 100px;
         }
 
         .popup-button {
@@ -93,21 +92,30 @@
             cursor: pointer;
         }
 
-        /* Bart image styling */
-        #bart {
-            display: none;
+        .circle-container {
             position: fixed;
-            width: 128px;
-            height: 128px;
-            z-index: 1001;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            pointer-events: none;
         }
 
-        @keyframes bounce {
-            0% { top: 100%; }
-            25% { top: 90%; }
-            50% { top: 100%; }
-            75% { top: 95%; }
-            100% { top: 100%; }
+        .circle-container img {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            animation: spin 3s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg) translateX(100px) rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg) translateX(100px) rotate(-360deg);
+            }
         }
     </style>
 </head>
@@ -126,68 +134,54 @@
         <div class="popup-button" onclick="closePopup()">OK</div>
     </div>
 
-    <!-- Bart image -->
-    <img id="bart" src="Images/Bart.png" alt="Bart">
-
-    <!-- Audio elements for sound effects -->
-    <audio id="appear-sound" src="SFX/peter-alert-appear.mp3"></audio>
-    <audio id="vanish-sound" src="SFX/peter-alert-vanish.mp3"></audio>
+    <!-- Circle container for images -->
+    <div id="circle-container" class="circle-container" style="display: none;">
+        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(0deg);">
+        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(51.42deg);">
+        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(102.84deg);">
+        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(154.26deg);">
+        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(205.68deg);">
+        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(257.1deg);">
+        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(308.52deg);">
+    </div>
 
     <script>
-        let shakeCount = 0;
-        let shakeTimeout;
-        let isPopupFrozen = false;
-        let isBartReleased = false;
-
         window.addEventListener('load', () => {
-            const randomTime = Math.floor(Math.random() * (20000 - 5000 + 1)) + 5000; // Random time between 5,000ms (5s) and 20,000ms (20s)
-
             setTimeout(function() {
                 const popup = document.getElementById('popup');
-                const appearSound = document.getElementById('appear-sound');
-
-                // Calculate random position
                 const screenWidth = window.innerWidth;
                 const screenHeight = window.innerHeight;
                 const popupWidth = popup.offsetWidth;
                 const popupHeight = popup.offsetHeight;
 
-                // Ensure the popup is fully within the viewport
                 const randomLeft = Math.random() * (screenWidth - popupWidth);
                 const randomTop = Math.random() * (screenHeight - popupHeight);
 
-                // Set random position
                 popup.style.left = `${randomLeft}px`;
                 popup.style.top = `${randomTop}px`;
 
-                popup.classList.add('show'); // Show the popup
-                appearSound.play(); // Play appear sound
+                popup.classList.add('show');
                 makeDraggable(popup);
-            }, randomTime); // Random time for popup to appear
+            }, Math.floor(Math.random() * (20000 - 5000 + 1)) + 5000);
         });
 
-        // Function to close the popup
         function closePopup() {
             const popup = document.getElementById('popup');
-            const vanishSound = document.getElementById('vanish-sound');
-
-            vanishSound.play(); // Play vanish sound
-            popup.classList.remove('show'); // Hide the popup
+            popup.classList.remove('show');
         }
 
-        // Function to make the element draggable and track shaking
         function makeDraggable(element) {
             let isDragging = false;
             let startX, startY, startLeft, startTop;
+            let shakeStart = null;
 
             element.addEventListener('mousedown', (event) => {
-                if (isPopupFrozen) return; // Stop dragging if popup is frozen
-
                 isDragging = true;
                 startX = event.clientX;
                 startY = event.clientY;
                 startLeft = parseInt(window.getComputedStyle(element).left, 10) || 0;
                 startTop = parseInt(window.getComputedStyle(element).top, 10) || 0;
+                shakeStart = Date.now();
 
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
@@ -197,58 +191,30 @@
                 if (isDragging) {
                     const deltaX = event.clientX - startX;
                     const deltaY = event.clientY - startY;
-
                     element.style.left = `${startLeft + deltaX}px`;
                     element.style.top = `${startTop + deltaY}px`;
 
-                    // Track shaking
-                    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-                        shakeCount++;
-                        clearTimeout(shakeTimeout);
-                        shakeTimeout = setTimeout(() => shakeCount = 0, 500); // Reset shake count after 500ms of no shaking
-                    }
-
-                    // Trigger Bart drop after 3 seconds of shaking
-                    if (shakeCount > 30 && !isPopupFrozen) { // 30 shake movements ~ 3 seconds
-                        isPopupFrozen = true;
-                        freezePopupAndDropBart(element);
+                    if (shakeStart && Date.now() - shakeStart >= 3000) {
+                        element.removeEventListener('mousedown', () => {});
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                        isDragging = false;
+                        showImagesInCircle();
                     }
                 }
             }
 
             function onMouseUp() {
                 isDragging = false;
+                shakeStart = null;
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup', onMouseUp);
             }
         }
 
-        function freezePopupAndDropBart(popup) {
-            popup.style.pointerEvents = 'none'; // Disable further dragging
-
-            if (!isBartReleased) {
-                isBartReleased = true; // Ensure Bart only flies out once
-
-                const bart = document.getElementById('bart');
-                bart.style.left = `${parseInt(popup.style.left) + popup.offsetWidth / 2 - 64}px`;
-                bart.style.top = `${parseInt(popup.style.top) - 128}px`;
-                bart.style.display = 'block';
-
-                // Animate Bart dropping down and bouncing
-                let bounceAnimation = bart.animate([
-                    { top: `${parseInt(bart.style.top)}px` },
-                    { top: `100%` }
-                ], {
-                    duration: 2000,
-                    easing: 'ease-in-out',
-                    iterations: 1,
-                });
-
-                bounceAnimation.onfinish = () => {
-                    bart.style.top = 'calc(100% - 128px)';
-                    bart.style.animation = 'bounce 1s infinite';
-                };
-            }
+        function showImagesInCircle() {
+            const circleContainer = document.getElementById('circle-container');
+            circleContainer.style.display = 'block';
         }
     </script>
 </body>
