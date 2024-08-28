@@ -99,13 +99,14 @@
             position: absolute;
             width: 50px;
             height: 50px;
-            opacity: 0;
-            transition: transform 5s ease-in-out, opacity 1s ease-in-out;
             cursor: pointer;
+            opacity: 1;
+            transition: transform 2s ease-in-out, opacity 1s ease-in-out;
         }
 
         .bart.drop {
-            transition: transform 2s ease-in-out; /* Faster drop transition */
+            transform: translateY(calc(100vh - 50px)); /* Drop to bottom of viewport */
+            opacity: 0;
         }
     </style>
 </head>
@@ -232,17 +233,19 @@
                 bart.style.opacity = 1;
 
                 // Add click event to Bart images
-                bart.addEventListener('click', () => {
+                bart.addEventListener('click', function handleClick() {
                     if (!bart.classList.contains('drop')) {
                         bart.classList.add('drop');
-                        bart.style.transform = `translateY(${window.innerHeight}px)`;
-                        bart.style.opacity = 0;
+                        bart.style.transform = `translateY(calc(100vh - 50px))`; // Drop to bottom of viewport
 
                         // Update clicked count
                         clickedBarts++;
                         if (clickedBarts === 3) {
                             window.location.href = "https://Giancaaa.github.io/Bart-Attack";
                         }
+
+                        // Remove the click event listener to prevent further clicks
+                        bart.removeEventListener('click', handleClick);
                     }
                 });
 
