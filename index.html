@@ -100,7 +100,7 @@
             width: 50px;
             height: 50px;
             opacity: 0;
-            transition: transform 2s ease-out, opacity 1s ease-in-out;
+            transition: transform 5s ease-in-out, opacity 1s ease-in-out;
         }
     </style>
 </head>
@@ -214,22 +214,33 @@
         // Function to animate Bart images
         function triggerBartFlutter() {
             const popupContent = document.getElementById('popup-content');
-            const bart1 = document.getElementById('bart1');
-            const bart2 = document.getElementById('bart2');
-            const bart3 = document.getElementById('bart3');
+            const bartImages = Array.from(document.querySelectorAll('.bart'));
 
-            const barts = [bart1, bart2, bart3];
-            barts.forEach((bart, index) => {
-                setTimeout(() => {
-                    // Position Bart images relative to the popup content
-                    const rect = popupContent.getBoundingClientRect();
-                    bart.style.left = `${rect.left + Math.random() * (rect.width - 50)}px`;
-                    bart.style.top = `${rect.top + Math.random() * (rect.height - 50)}px`;
+            bartImages.forEach(bart => {
+                // Start from inside the popup
+                const rect = popupContent.getBoundingClientRect();
+                bart.style.left = `${rect.left + Math.random() * (rect.width - 50)}px`;
+                bart.style.top = `${rect.top + Math.random() * (rect.height - 50)}px`;
+                bart.style.opacity = 1;
 
-                    bart.style.opacity = 1;
-                    bart.style.transform = `translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px) rotate(${Math.random() * 360}deg)`;
-                }, index * 200); // Slight delay between each Bart
+                // Animate each Bart image
+                animateBart(bart);
             });
+        }
+
+        function animateBart(bart) {
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+
+            function moveBart() {
+                const newX = Math.random() * (screenWidth - 50);
+                const newY = Math.random() * (screenHeight - 50);
+
+                bart.style.transform = `translate(${newX}px, ${newY}px)`;
+                setTimeout(moveBart, 2000); // Move every 2 seconds
+            }
+
+            moveBart();
         }
     </script>
 </body>
