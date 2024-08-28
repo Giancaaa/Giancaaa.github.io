@@ -13,7 +13,7 @@
             background-attachment: fixed;
             margin: 0;
             padding: 0;
-            font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+            font-family: 'Papyrus', 'Comic Sans MS', 'Comic Sans', cursive;
         }
 
         h1 {
@@ -26,31 +26,32 @@
 
         /* Popup styling */
         .popup {
-            display: none;
+            display: none; /* Hidden by default */
             position: fixed;
-            width: 300px;
-            height: 200px;
+            width: 300px; /* Original width */
+            height: 200px; /* Original height */
             padding: 20px;
             background-color: #c0c0c0;
             border: 2px solid #000;
             box-shadow: 10px 10px 5px #888888;
             z-index: 1000;
             font-family: 'Verdana', sans-serif;
-            cursor: move;
-            user-select: none;
+            cursor: move; /* Change cursor to indicate draggable area */
+            user-select: none; /* Prevent text selection */
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: opacity 0.5s ease;
+            opacity: 0; /* Start invisible */
+            transition: opacity 0.5s ease; /* Smooth transition */
         }
 
         .popup.show {
-            display: flex;
-            opacity: 1;
+            display: flex; /* Show when the class 'show' is added */
+            opacity: 1; /* Fade in effect */
         }
 
         .popup-header {
-            position: relative;
+            position: relative; /* Position relative for the close button */
             font-weight: bold;
             background-color: #000080;
             color: white;
@@ -77,8 +78,8 @@
         }
 
         .popup-content img {
-            width: 100px;
-            height: 100px;
+            width: 100px; /* Smaller width */
+            height: 100px; /* Smaller height */
         }
 
         .popup-button {
@@ -92,30 +93,13 @@
             cursor: pointer;
         }
 
-        .circle-container {
+        /* Bart image styling */
+        .bart {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 200px;
-            height: 200px;
-            pointer-events: none;
-        }
-
-        .circle-container img {
-            position: absolute;
             width: 50px;
             height: 50px;
-            animation: spin 3s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg) translateX(100px) rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg) translateX(100px) rotate(-360deg);
-            }
+            opacity: 0;
+            transition: transform 2s ease-out, opacity 1s ease-in-out;
         }
     </style>
 </head>
@@ -134,87 +118,111 @@
         <div class="popup-button" onclick="closePopup()">OK</div>
     </div>
 
-    <!-- Circle container for images -->
-    <div id="circle-container" class="circle-container" style="display: none;">
-        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(0deg);">
-        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(51.42deg);">
-        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(102.84deg);">
-        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(154.26deg);">
-        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(205.68deg);">
-        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(257.1deg);">
-        <img src="Images/Bart.png" alt="Bart" class="circle-img" style="transform: rotate(308.52deg);">
-    </div>
+    <!-- Audio elements for sound effects -->
+    <audio id="appear-sound" src="SFX/peter-alert-appear.mp3"></audio>
+    <audio id="vanish-sound" src="SFX/peter-alert-vanish.mp3"></audio>
+
+    <!-- Bart images -->
+    <img id="bart1" src="Images/Bart.png" class="bart" alt="Bart">
+    <img id="bart2" src="Images/Bart.png" class="bart" alt="Bart">
+    <img id="bart3" src="Images/Bart.png" class="bart" alt="Bart">
 
     <script>
+        // Show the popup after a random time between 5 and 20 seconds
         window.addEventListener('load', () => {
+            const randomTime = Math.floor(Math.random() * (20000 - 5000 + 1)) + 5000; // Random time between 5,000ms (5s) and 20,000ms (20s)
+
             setTimeout(function() {
                 const popup = document.getElementById('popup');
+                const appearSound = document.getElementById('appear-sound');
+
+                // Calculate random position
                 const screenWidth = window.innerWidth;
                 const screenHeight = window.innerHeight;
                 const popupWidth = popup.offsetWidth;
                 const popupHeight = popup.offsetHeight;
 
+                // Ensure the popup is fully within the viewport
                 const randomLeft = Math.random() * (screenWidth - popupWidth);
                 const randomTop = Math.random() * (screenHeight - popupHeight);
 
+                // Set random position
                 popup.style.left = `${randomLeft}px`;
                 popup.style.top = `${randomTop}px`;
 
-                popup.classList.add('show');
+                popup.classList.add('show'); // Show the popup
+                appearSound.play(); // Play appear sound
                 makeDraggable(popup);
-            }, Math.floor(Math.random() * (20000 - 5000 + 1)) + 5000);
+            }, randomTime); // Random time for popup to appear
         });
 
+        // Function to close the popup
         function closePopup() {
             const popup = document.getElementById('popup');
-            popup.classList.remove('show');
+            const vanishSound = document.getElementById('vanish-sound');
+
+            vanishSound.play(); // Play vanish sound
+            popup.classList.remove('show'); // Hide the popup
         }
 
+        // Function to make the element draggable
         function makeDraggable(element) {
             let isDragging = false;
-            let startX, startY, startLeft, startTop;
-            let shakeStart = null;
+            let shakeStartTime = 0;
 
             element.addEventListener('mousedown', (event) => {
                 isDragging = true;
-                startX = event.clientX;
-                startY = event.clientY;
-                startLeft = parseInt(window.getComputedStyle(element).left, 10) || 0;
-                startTop = parseInt(window.getComputedStyle(element).top, 10) || 0;
-                shakeStart = Date.now();
+                const startX = event.clientX;
+                const startY = event.clientY;
+                let startLeft = parseInt(window.getComputedStyle(element).left, 10) || 0;
+                let startTop = parseInt(window.getComputedStyle(element).top, 10) || 0;
 
                 document.addEventListener('mousemove', onMouseMove);
                 document.addEventListener('mouseup', onMouseUp);
-            });
 
-            function onMouseMove(event) {
-                if (isDragging) {
-                    const deltaX = event.clientX - startX;
-                    const deltaY = event.clientY - startY;
-                    element.style.left = `${startLeft + deltaX}px`;
-                    element.style.top = `${startTop + deltaY}px`;
+                function onMouseMove(event) {
+                    if (isDragging) {
+                        const deltaX = event.clientX - startX;
+                        const deltaY = event.clientY - startY;
 
-                    if (shakeStart && Date.now() - shakeStart >= 3000) {
-                        element.removeEventListener('mousedown', () => {});
-                        document.removeEventListener('mousemove', onMouseMove);
-                        document.removeEventListener('mouseup', onMouseUp);
-                        isDragging = false;
-                        showImagesInCircle();
+                        element.style.left = `${startLeft + deltaX}px`;
+                        element.style.top = `${startTop + deltaY}px`;
+
+                        // Detect shake by checking rapid movement
+                        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                            if (shakeStartTime === 0) {
+                                shakeStartTime = Date.now();
+                            } else if (Date.now() - shakeStartTime >= 3000) {
+                                triggerBartFlutter();
+                                shakeStartTime = 0; // Reset after triggering
+                            }
+                        } else {
+                            shakeStartTime = 0; // Reset if no significant movement
+                        }
                     }
                 }
-            }
 
-            function onMouseUp() {
-                isDragging = false;
-                shakeStart = null;
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            }
+                function onMouseUp() {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                }
+            });
         }
 
-        function showImagesInCircle() {
-            const circleContainer = document.getElementById('circle-container');
-            circleContainer.style.display = 'block';
+        // Function to animate Bart images
+        function triggerBartFlutter() {
+            const bart1 = document.getElementById('bart1');
+            const bart2 = document.getElementById('bart2');
+            const bart3 = document.getElementById('bart3');
+
+            const barts = [bart1, bart2, bart3];
+            barts.forEach((bart, index) => {
+                setTimeout(() => {
+                    bart.style.opacity = 1;
+                    bart.style.transform = `translate(${Math.random() * 200 - 100}px, ${window.innerHeight}px) rotate(${Math.random() * 360}deg)`;
+                }, index * 200); // Slight delay between each Bart
+            });
         }
     </script>
 </body>
