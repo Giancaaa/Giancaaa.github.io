@@ -101,6 +101,11 @@
             height: 50px;
             opacity: 0;
             transition: transform 5s ease-in-out, opacity 1s ease-in-out;
+            cursor: pointer;
+        }
+
+        .bart.drop {
+            transition: transform 2s ease-in-out; /* Faster drop transition */
         }
     </style>
 </head>
@@ -129,6 +134,8 @@
     <img id="bart3" src="Images/Bart.png" class="bart" alt="Bart">
 
     <script>
+        let clickedBarts = 0;
+
         // Show the popup after a random time between 5 and 20 seconds
         window.addEventListener('load', () => {
             const randomTime = Math.floor(Math.random() * (20000 - 5000 + 1)) + 5000; // Random time between 5,000ms (5s) and 20,000ms (20s)
@@ -154,6 +161,7 @@
                 popup.classList.add('show'); // Show the popup
                 appearSound.play(); // Play appear sound
                 makeDraggable(popup);
+                triggerBartFlutter();
             }, randomTime); // Random time for popup to appear
         });
 
@@ -223,7 +231,22 @@
                 bart.style.top = `${rect.top + Math.random() * (rect.height - 50)}px`;
                 bart.style.opacity = 1;
 
-                // Animate each Bart image
+                // Add click event to Bart images
+                bart.addEventListener('click', () => {
+                    if (!bart.classList.contains('drop')) {
+                        bart.classList.add('drop');
+                        bart.style.transform = `translateY(${window.innerHeight}px)`;
+                        bart.style.opacity = 0;
+
+                        // Update clicked count
+                        clickedBarts++;
+                        if (clickedBarts === 3) {
+                            window.location.href = "https://Giancaaa.github.io/Bart-Attack";
+                        }
+                    }
+                });
+
+                // Start flutter animation
                 animateBart(bart);
             });
         }
