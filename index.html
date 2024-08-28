@@ -76,6 +76,7 @@
             align-items: center;
             justify-content: center;
             position: relative; /* Make it relative to position Bart images */
+            overflow: hidden; /* Ensure images stay within popup */
         }
 
         .popup-content img {
@@ -100,12 +101,12 @@
             width: 50px;
             height: 50px;
             cursor: pointer;
-            opacity: 1;
+            opacity: 0; /* Start hidden */
             transition: transform 2s ease-in-out, opacity 1s ease-in-out;
         }
 
         .bart.drop {
-            transform: translateY(calc(100vh - 50px)); /* Drop to bottom of viewport */
+            transform: translateY(calc(100% - 50px)); /* Drop to bottom of the popup area */
             opacity: 0;
         }
     </style>
@@ -236,7 +237,7 @@
                 bart.addEventListener('click', function handleClick() {
                     if (!bart.classList.contains('drop')) {
                         bart.classList.add('drop');
-                        bart.style.transform = `translateY(calc(100vh - 50px))`; // Drop to bottom of viewport
+                        bart.style.transform = `translateY(calc(100% - 50px))`; // Drop to bottom of the popup area
 
                         // Update clicked count
                         clickedBarts++;
@@ -254,16 +255,20 @@
             });
         }
 
+        // Function to animate Bart images
         function animateBart(bart) {
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
+            const popupContent = document.getElementById('popup-content');
+            const rect = popupContent.getBoundingClientRect();
+            const screenWidth = rect.width;
+            const screenHeight = rect.height;
 
             function moveBart() {
-                const newX = Math.random() * (screenWidth - 50);
-                const newY = Math.random() * (screenHeight - 50);
-
-                bart.style.transform = `translate(${newX}px, ${newY}px)`;
-                setTimeout(moveBart, 2000); // Move every 2 seconds
+                if (!bart.classList.contains('drop')) {
+                    const newX = Math.random() * (screenWidth - 50);
+                    const newY = Math.random() * (screenHeight - 50);
+                    bart.style.transform = `translate(${newX}px, ${newY}px)`;
+                    setTimeout(moveBart, 2000); // Move every 2 seconds
+                }
             }
 
             moveBart();
