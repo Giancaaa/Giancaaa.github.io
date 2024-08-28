@@ -75,6 +75,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative; /* Make it relative to position Bart images */
         }
 
         .popup-content img {
@@ -95,7 +96,7 @@
 
         /* Bart image styling */
         .bart {
-            position: fixed;
+            position: absolute;
             width: 50px;
             height: 50px;
             opacity: 0;
@@ -112,7 +113,7 @@
             Peter Alert
             <span class="popup-close" onclick="closePopup()">×</span>
         </div>
-        <div class="popup-content">
+        <div class="popup-content" id="popup-content">
             <img src="Images/peter-alert.png" alt="Peter Alert">
         </div>
         <div class="popup-button" onclick="closePopup()">OK</div>
@@ -212,6 +213,7 @@
 
         // Function to animate Bart images
         function triggerBartFlutter() {
+            const popupContent = document.getElementById('popup-content');
             const bart1 = document.getElementById('bart1');
             const bart2 = document.getElementById('bart2');
             const bart3 = document.getElementById('bart3');
@@ -219,8 +221,13 @@
             const barts = [bart1, bart2, bart3];
             barts.forEach((bart, index) => {
                 setTimeout(() => {
+                    // Position Bart images relative to the popup content
+                    const rect = popupContent.getBoundingClientRect();
+                    bart.style.left = `${rect.left + Math.random() * (rect.width - 50)}px`;
+                    bart.style.top = `${rect.top + Math.random() * (rect.height - 50)}px`;
+
                     bart.style.opacity = 1;
-                    bart.style.transform = `translate(${Math.random() * 200 - 100}px, ${window.innerHeight}px) rotate(${Math.random() * 360}deg)`;
+                    bart.style.transform = `translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px) rotate(${Math.random() * 360}deg)`;
                 }, index * 200); // Slight delay between each Bart
             });
         }
